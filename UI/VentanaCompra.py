@@ -65,19 +65,16 @@ class Ui_MainWindow(object):
         )
 
         # Botón "Terminar Compra"
-        self.pushButton = QtWidgets.QPushButton(parent=self.groupBox_2)
-        self.pushButton.setText("Terminar Compra")
-        self.pushButton.setFixedSize(200, 40)  # Tamaño del botón ajustado
+        self.pushButtonT = QtWidgets.QPushButton(parent=self.groupBox_2)
+        self.pushButtonT.setText("Terminar Compra")
+        self.pushButtonT.setFixedSize(200, 40)  # Tamaño del botón ajustado
         self.grid_layout.addWidget(
-            self.pushButton,
+            self.pushButtonT,
             len(ControlPlagas.pestList) + 3,  # Última fila del grid
             2,  # Columna derecha
             alignment=QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignBottom,
         )
         
-        # Conectar el botón para obtener valores y procesarlos
-        self.pushButton.clicked.connect(self.handleButtonClick)
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
@@ -90,25 +87,14 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def handleButtonClick(self):
-        try:
-            print(self.farmStore.clients)
-            # Procesar datos
-            self.farmStore, clientName, clientId, purchasedItems, bill = self.saveClient(self.farmStore)
-            controladorTienda.ControllerStore.updateStore(self.farmStore)
-
-            print(self.farmStore.clients)
-
-            # Abrir nueva ventana y pasar farmStore
-            self.newWindow = QtWidgets.QMainWindow()
-            ui = Ui_InvoiceWindow()
-            ui.setupUi(self.newWindow, clientName, clientId, purchasedItems, bill)
-            self.newWindow.show()
-
-            # Cerrar la ventana actual
-            #QtWidgets.QApplication.instance().activeWindow().close()
-        except Exception as e:
-            print(f"Error al mostrar la ventana de factura: {e}")
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "REALIZAR COMPRA"))
+        self.groupBox.setTitle(_translate("MainWindow", "Datos del Cliente"))
+        self.label.setText(_translate("MainWindow", "Nombre:"))
+        self.label_2.setText(_translate("MainWindow", "Número de identificación:"))
+        self.groupBox_2.setTitle(_translate("MainWindow", "Detalles de la Compra"))
+    
 
     def addProductColumn(self, layout, column, title, products):
         # Título de la columna
@@ -128,60 +114,3 @@ class Ui_MainWindow(object):
 
             # Guardar referencia del SpinBox junto con el producto
             self.spin_boxes.append((product, spin_box))
-
-    def getInputData(self):
-        # Obtener nombre e identificación del cliente
-        clientName = self.lineEdit.text()
-        clientId = self.lineEdit_2.text()
-
-        # Obtener productos seleccionados
-        purchasedItems = [(product, spin_box.value()) for product, spin_box in self.spin_boxes if spin_box.value() > 0]
-
-        # Retornos necesarios
-        return clientName, clientId, purchasedItems
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "REALIZAR COMPRA"))
-        self.groupBox.setTitle(_translate("MainWindow", "Datos del Cliente"))
-        self.label.setText(_translate("MainWindow", "Nombre:"))
-        self.label_2.setText(_translate("MainWindow", "Número de identificación:"))
-        self.groupBox_2.setTitle(_translate("MainWindow", "Detalles de la Compra"))
-
-    def saveClient(self, farmStore):
-        if farmStore is None:
-            farmStore = controladorTienda.ControllerStore.create()
-
-        clientName, clientId, purchasedItems = self.getInputData()
-
-        products = []
-        for product, quantity in purchasedItems:
-            while quantity > 0:
-                products.append(product)
-                quantity -= 1
-
-        # Buscar o crear cliente
-        customer = controladorCliente.ControllerClient.searchBy(clientId, farmStore.clients)
-        if customer is None:
-            customer = controladorCliente.ControllerClient.create(clientName, clientId, farmStore)
-
-        # Crear la factura
-        bill = controladorFactura.ControllerBill.create(products, customer)
-
-        return farmStore, clientName, clientId, purchasedItems, bill
-
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-
-    # Inicializar farmStore una vez
-    farmStore = controladorTienda.ControllerStore.create()
-
-    # Configurar la ventana principal con el farmStore
-    ui = Ui_MainWindow()
-    ui.farmStore = farmStore  # Pasar la referencia de farmStore a la ventana principal
-    ui.setupUi(MainWindow)
-
-    MainWindow.show()
-    sys.exit(app.exec())
