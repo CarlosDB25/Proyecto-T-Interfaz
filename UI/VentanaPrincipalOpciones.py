@@ -98,7 +98,7 @@ class Ui_MainWindow(object):
     def handleButtonClick(self, window, windowContainer):
         try:
             # Procesar datos
-            window.farmStore, clientName, clientId, purchasedItems, bill = self.saveClient(window.farmStore, window)
+            window.farmStore, clientName, clientId, purchasedItems, bill = self.saveClient(window.farmStore, window, windowContainer)
             controladorTienda.ControllerStore.updateStore(window.farmStore)
             # Cerrar la ventana actual
             windowContainer.close()
@@ -115,7 +115,7 @@ class Ui_MainWindow(object):
         except Exception as e:
             print(f"Error al mostrar la ventana de factura: {e}")
 
-    def getInputData(self, window):
+    def getInputData(self, window, windowContainer):
         # Obtener nombre e identificación del cliente
         clientName = window.lineEdit.text()
         clientId = window.lineEdit_2.text()
@@ -123,14 +123,18 @@ class Ui_MainWindow(object):
         # Obtener productos seleccionados
         purchasedItems = [(product, spin_box.value()) for product, spin_box in window.spin_boxes if spin_box.value() > 0]
 
+        if (not clientName) or (not clientId) or (not purchasedItems):
+            QtWidgets.QMessageBox.warning(windowContainer, "Error", "Por favor, ingrese los datos.")
+            return
+
         # Retornos necesarios
         return clientName, clientId, purchasedItems
 
-    def saveClient(self, farmStore, window):
+    def saveClient(self, farmStore, window, windowContainer):
         if farmStore is None:
             farmStore = controladorTienda.ControllerStore.create()
 
-        clientName, clientId, purchasedItems = self.getInputData(window)
+        clientName, clientId, purchasedItems = self.getInputData(window, windowContainer)
 
         products = []
         for product, quantity in purchasedItems:

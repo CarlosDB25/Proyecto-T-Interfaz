@@ -3,7 +3,7 @@ from MODELO import ProductoControl
 from MODELO import ControlPlagas 
 from MODELO import ControlFertilizantes 
 
-class controlProductCrud(PCrud):
+class ControlProductCrud(PCrud):
     def create(self, **kwargs):
         if kwargs['type'] == 'Pest':
             product = ControlPlagas.PestControl(kwargs['ica'], kwargs['name'], kwargs['price'], kwargs['applicationFrequency'], kwargs['deficiencyPeriod'])

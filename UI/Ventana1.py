@@ -1,9 +1,12 @@
 from PyQt6 import QtWidgets, QtCore
 import sys
-<<<<<<< Updated upstream
 import os
-=======
->>>>>>> Stashed changes
+
+# Agregar el directorio raíz al sys.path
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
 from MODELO import ControlPlagas, ControlFertilizantes, Antibiotico
 from CONTROLADORES import controladorCliente, controladorFactura, controladorTienda
 from VentanaFactura import Ui_InvoiceWindow
@@ -11,7 +14,7 @@ from VentanaFactura import Ui_InvoiceWindow
 
 class Ui_MainWindow(object):
     def __init__(self):
-        self.farmStore = None
+        self.farmStore = None  # Variable de instancia para almacenar la tienda
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -62,16 +65,19 @@ class Ui_MainWindow(object):
         )
 
         # Botón "Terminar Compra"
-        self.pushButtonT = QtWidgets.QPushButton(parent=self.groupBox_2)
-        self.pushButtonT.setText("Terminar Compra")
-        self.pushButtonT.setFixedSize(200, 40)  # Tamaño del botón ajustado
+        self.pushButton = QtWidgets.QPushButton(parent=self.groupBox_2)
+        self.pushButton.setText("Terminar Compra")
+        self.pushButton.setFixedSize(200, 40)  # Tamaño del botón ajustado
         self.grid_layout.addWidget(
-            self.pushButtonT,
+            self.pushButton,
             len(ControlPlagas.pestList) + 3,  # Última fila del grid
             2,  # Columna derecha
             alignment=QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignBottom,
         )
-        
+
+        # Conectar el botón para obtener valores y procesarlos
+        self.pushButton.clicked.connect(self.handleButtonClick)
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
@@ -84,14 +90,21 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "REALIZAR COMPRA"))
-        self.groupBox.setTitle(_translate("MainWindow", "Datos del Cliente"))
-        self.label.setText(_translate("MainWindow", "Nombre:"))
-        self.label_2.setText(_translate("MainWindow", "Número de identificación:"))
-        self.groupBox_2.setTitle(_translate("MainWindow", "Detalles de la Compra"))
-    
+    def handleButtonClick(self):
+        try:
+            # Datos
+            farmStore, clienName, clientId, purchasedItems, bill = self.saveClient(self.farmStore)
+            print(f"Datos: {clienName}, {clientId}, {purchasedItems}, {bill}")
+
+            # Nueva ventana
+            self.newWindow = QtWidgets.QMainWindow()
+            ui = Ui_InvoiceWindow()
+            ui.setupUi(self.newWindow, clienName, clientId, purchasedItems, bill)
+            self.newWindow.show()
+
+            MainWindow.close()
+        except Exception as e:
+            print(f"Error al mostrar la ventana de factura: {e}")
 
     def addProductColumn(self, layout, column, title, products):
         # Título de la columna
@@ -111,3 +124,49 @@ class Ui_MainWindow(object):
 
             # Guardar referencia del SpinBox junto con el producto
             self.spin_boxes.append((product, spin_box))
+
+    def getInputData(self):
+        # Obtener nombre e identificación del cliente
+        clientName = self.lineEdit.text()
+        clientId = self.lineEdit_2.text()
+
+        # Obtener productos seleccionados
+        purchasedItems = [(product, spin_box.value()) for product, spin_box in self.spin_boxes if spin_box.value() > 0]
+
+        # Retornos necesarios
+        return clientName, clientId, purchasedItems
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "REALIZAR COMPRA"))
+        self.groupBox.setTitle(_translate("MainWindow", "Datos del Cliente"))
+        self.label.setText(_translate("MainWindow", "Nombre:"))
+        self.label_2.setText(_translate("MainWindow", "Número de identificación:"))
+        self.groupBox_2.setTitle(_translate("MainWindow", "Detalles de la Compra"))
+
+    def saveClient(self, farmStore):
+        if farmStore == None:
+            farmStore = controladorTienda.ControllerStore.create()
+
+        clientName, clientId, purchasedItems = self.getInputData()
+
+        products = []
+
+        for product, quantity in purchasedItems:
+            while quantity > 0:
+                products.append(product)
+                quantity -= 1
+        
+        customer = controladorCliente.ControllerClient.create(clientName, clientId, farmStore)
+        bill = controladorFactura.ControllerBill.create(products, customer)
+
+        return farmStore, clientName, clientId, purchasedItems, bill
+    
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec())
