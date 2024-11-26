@@ -1,6 +1,7 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 import os
 import sys
+sys.path.append("C:/Users/carlo/OneDrive/Documentos/Universidad/Programacion/N°4/Proyecto-T-Interfaz")
 from VentanaHistorial import HistoryListWindow  # Importar la clase HistoryListWindow
 from CONTROLADORES import controladorCliente, controladorTienda, controladorFactura
 from MODELO.Antibiotico import antibioticsList

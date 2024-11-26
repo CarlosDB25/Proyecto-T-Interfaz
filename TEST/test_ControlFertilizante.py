@@ -2,26 +2,32 @@ import unittest
 from MODELO.ControlFertilizantes import FertilizerControl
 
 class TestFertilizerControl(unittest.TestCase):
-    def test_crear_fertilizer_control(self):
-        control = FertilizerControl("1234", "Fertilizante A", 20000, 30, 15)
-        self.assertEqual(control.ica, "1234")
-        self.assertEqual(control.name, "Fertilizante A")
-        self.assertEqual(control.price, 20000)
-        self.assertEqual(control.applicationFrequency, 30)
-        self.assertEqual(control.lastAdministration, 15)
+    def test_initialization(self):
+        fertilizer = FertilizerControl(ica=234, name="Nitrogen Fertilizer", price=9.99, applicationFrequency="Mensual", lastAdministration="11-07-2024")
+        
+        # Validar inicialización de atributos
+        self.assertEqual(fertilizer.ica, 234)
+        self.assertEqual(fertilizer.name, "Nitrogen Fertilizer")
+        self.assertEqual(fertilizer.price, 9.99)
+        self.assertEqual(fertilizer.applicationFrequency, "Mensual")
+        self.assertEqual(fertilizer.lastAdministration, "11-07-2024")
 
-    def test_setters_fertilizer_control(self):
-        control = FertilizerControl("1234", "Fertilizante A", 20000, 30, 15)
-        control.ica = "5678"
-        control.name = "Fertilizante B"
-        control.price = 25000
-        control.applicationFrequency = 45
-        control.lastAdministration = 20
-        self.assertEqual(control.ica, "5678")
-        self.assertEqual(control.name, "Fertilizante B")
-        self.assertEqual(control.price, 25000)
-        self.assertEqual(control.applicationFrequency, 45)
-        self.assertEqual(control.lastAdministration, 20)
+    def test_setters_and_getters(self):
+        fertilizer = FertilizerControl(ica=235, name="Phosphorus Fertilizer", price=11.99, applicationFrequency="8 dias", lastAdministration="01-03-2024")
+        
+        # Cambiar valores mediante setters
+        fertilizer.name = "Updated Fertilizer"
+        fertilizer.price = 12.50
+        fertilizer.applicationFrequency = "15 dias"
+        fertilizer.lastAdministration = "05-06-2024"
+        
+        # Validar cambios
+        self.assertEqual(fertilizer.name, "Updated Fertilizer")
+        self.assertEqual(fertilizer.price, 12.50)
+        self.assertEqual(fertilizer.applicationFrequency, "15 dias")
+        self.assertEqual(fertilizer.lastAdministration, "05-06-2024")
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_str_method(self):
+        fertilizer = FertilizerControl(ica=236, name="Potassium Fertilizer", price=14.25, applicationFrequency="Semanal", lastAdministration="25-10-2024")
+        expected_output = "- Potassium Fertilizer - $14.25"
+        self.assertEqual(str(fertilizer), expected_output)

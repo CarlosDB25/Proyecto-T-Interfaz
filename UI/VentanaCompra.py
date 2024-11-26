@@ -1,9 +1,11 @@
 from PyQt6 import QtWidgets, QtCore
 import sys
-<<<<<<< Updated upstream
 import os
-=======
->>>>>>> Stashed changes
+# Agregar el directorio raíz al sys.path
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
+
 from MODELO import ControlPlagas, ControlFertilizantes, Antibiotico
 from CONTROLADORES import controladorCliente, controladorFactura, controladorTienda
 from VentanaFactura import Ui_InvoiceWindow
