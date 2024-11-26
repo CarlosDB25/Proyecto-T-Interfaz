@@ -1,9 +1,6 @@
 from PyQt6 import QtWidgets, QtCore
 import sys
-<<<<<<< Updated upstream
 import os
-=======
->>>>>>> Stashed changes
 from MODELO import ControlPlagas, ControlFertilizantes, Antibiotico
 from CONTROLADORES import controladorCliente, controladorFactura, controladorTienda
 from VentanaFactura import Ui_InvoiceWindow
